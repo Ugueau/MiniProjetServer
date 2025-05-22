@@ -48,18 +48,17 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
                         elif message[:15] == "configuration :":
                                 json_part = message.split(":", 1)[1].strip()
                                 data = json.loads(json_part)
-                                #Notify Serial thread
-                                notification_queue.put(("configuration_update", data))
-                                
                                 with open('microbits_configuration.json', 'r') as file:
                                         sensor_data = json.load(file)
                                 for sensor in sensor_data:
                                         if sensor["id"] == data["id"]:
-                                                sensor.update(data)
-                                                break
+                                                sensor["luminosityConfigIndex"] = data["luminosityConfigIndex"]
+                                                sensor["temperatureConfigIndex"] = data["temperatureConfigIndex"]
+                                                sensor["humidityConfigIndex"] = data["humidityConfigIndex"]
                                 with open('microbits_configuration.json', 'w') as file:
                                         json.dump(sensor_data, file, indent=2)
-                                                        
+                                # Notify Serial thread
+                                notification_queue.put(("configuration_update", data))
                         else:
                                 print("Unknown message: ",data)
 
@@ -72,7 +71,7 @@ SERIALPORT = "/dev/ttyUSB0"
 BAUDRATE = 115200
 ser = serial.Serial()
 
-def initUART():        
+def initUART():
         # ser = serial.Serial(SERIALPORT, BAUDRATE)
         ser.port=SERIALPORT
         ser.baudrate=BAUDRATE
