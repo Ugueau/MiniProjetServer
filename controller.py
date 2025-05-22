@@ -95,9 +95,9 @@ def initUART():
                 exit()
 
 
-
 def sendUARTMessage(msg):
-    ser.write(msg.encode())
+    msg = str(msg)
+    # ser.write(msg.encode())
     print("Message <" + msg + "> sent to micro-controller." )
 
 
