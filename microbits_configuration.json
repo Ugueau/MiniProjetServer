@@ -1,0 +1,32 @@
+[
+  {
+    "name": "baguette",
+    "id": 1,
+    "temperature": 22,
+    "humidity": 55,
+    "luminosity": 300,
+    "temperatureConfigIndex": 0,
+    "humidityConfigIndex": 1,
+    "luminosityConfigIndex": 2
+  },
+  {
+    "name": "Microbit",
+    "id": 2,
+    "temperature": 25,
+    "humidity": 60,
+    "luminosity": 450,
+    "temperatureConfigIndex": 1,
+    "humidityConfigIndex": 2,
+    "luminosityConfigIndex": 0
+  },
+  {
+    "name": "Microbit",
+    "id": 3,
+    "temperature": 20,
+    "humidity": 50,
+    "luminosity": 250,
+    "temperatureConfigIndex": 2,
+    "humidityConfigIndex": 0,
+    "luminosityConfigIndex": 1
+  }
+]
