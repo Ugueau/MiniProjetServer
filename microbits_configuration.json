@@ -1,32 +1,12 @@
 [
   {
-    "name": "Microbit",
-    "id": "1",
-    "temperature": 22,
-    "humidity": 55,
-    "luminosity": 300,
-    "temperatureConfigIndex": 2,
-    "humidityConfigIndex": 0,
-    "luminosityConfigIndex": 1
-  },
-  {
-    "name": "Microbit",
-    "id": "2",
-    "temperature": 25,
-    "humidity": 60,
-    "luminosity": 450,
-    "temperatureConfigIndex": 2,
-    "humidityConfigIndex": 0,
-    "luminosityConfigIndex": 1
-  },
-  {
-    "name": "Microbit",
-    "id": "3",
-    "temperature": 20,
-    "humidity": 50,
-    "luminosity": 250,
-    "temperatureConfigIndex": 2,
-    "humidityConfigIndex": 0,
-    "luminosityConfigIndex": 1
+    "name": "Microbit I1",
+    "id": "I1",
+    "temperature": 26,
+    "humidity": 42,
+    "luminosity": 6,
+    "temperatureConfigIndex": 1,
+    "humidityConfigIndex": 2,
+    "luminosityConfigIndex": 0
   }
 ]
