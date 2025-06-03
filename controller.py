@@ -6,10 +6,13 @@ import signal
 import sys
 import socket
 import socketserver
-import serial
+import serial # pip install pyserial
 import threading
 import json
 import queue
+import base64
+from Crypto.Cipher import AES # pip install pycryptodome
+from Crypto.Util.Padding import unpad
 
 HOST = "0.0.0.0"
 UDP_PORT = 10000
@@ -19,9 +22,19 @@ LAST_VALUE = "LA FRANCE !"
 
 notification_queue = queue.Queue()
 
+# Clé AES partagée
+key = b'1234567890abcdef'
+
 
 class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
 
+    def decrypt_message(self, iv_b64, data_b64):
+        iv = base64.b64decode(iv_b64)
+        encrypted_data = base64.b64decode(data_b64)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size)
+        return decrypted.decode('utf-8')
+    
     def handle(self):
         data = self.request[0].strip()
         socket = self.request[1]
@@ -32,13 +45,14 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
             )
         )
         try:
-            message = data.decode("utf-8")  # decode bytes to string
+            encrypted_data = json.loads(data.decode("utf-8"))
+            message = self.decrypt_message(encrypted_data["iv"], encrypted_data["data"])
         except UnicodeDecodeError:
             print("Failed to decode message from client")
             return
         if data != "":
             if message in MICRO_COMMANDS:  # Send message through UART
-                sendUARTMessage(data)
+                writeUartMessage(data)
             elif (
                 message == "getValues()"
             ):  # Sent last value received from micro-controller
@@ -176,7 +190,7 @@ if __name__ == "__main__":
         print(f"Using IP address: {HOST}")
     else:
         print("No IP address provided. Using default: 0.0.0.0")
-    initUART()
+    #initUART()
     f = open(FILENAME, "a")
     print("Press Ctrl-C to quit.")
 
