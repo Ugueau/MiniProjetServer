@@ -13,6 +13,8 @@ import queue
 import base64
 from Crypto.Cipher import AES # pip install pycryptodome
 from Crypto.Util.Padding import unpad
+from Crypto.Util.Padding import pad
+from Crypto.Random import get_random_bytes
 
 HOST = "0.0.0.0"
 UDP_PORT = 10000
@@ -35,6 +37,19 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size)
         return decrypted.decode('utf-8')
     
+    def encrypt_message(self, plaintext: str) -> str:
+        iv = get_random_bytes(16)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padded_text = pad(plaintext.encode('utf-8'), AES.block_size)
+        encrypted_bytes = cipher.encrypt(padded_text)
+        iv_b64 = base64.b64encode(iv).decode('utf-8')
+        data_b64 = base64.b64encode(encrypted_bytes).decode('utf-8')
+        message = {
+            "iv": iv_b64,
+            "data": data_b64
+        }
+        return json.dumps(message)
+    
     def handle(self):
         data = self.request[0].strip()
         socket = self.request[1]
@@ -50,6 +65,13 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         except UnicodeDecodeError:
             print("Failed to decode message from client")
             return
+        except json.JSONDecodeError:
+            print("Failed to decode JSON from client")
+            return
+        except Exception as e:
+            print(f"Error processing message: {message} from client {self.client_address} will be ignored")
+            print(f"Exception caught: {e}")
+            return
         if data != "":
             if message in MICRO_COMMANDS:  # Send message through UART
                 writeUartMessage(data)
@@ -59,12 +81,15 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
                 socket.sendto(LAST_VALUE, self.client_address)
                 # TODO: Create last_values_received as global variable
             elif message == "is_reachable":
-                socket.sendto(b"1", self.client_address)
+                encrypted_data = self.encrypt_message("1")
+                response = encrypted_data.encode("utf-8")
+                socket.sendto(response, self.client_address)
             elif message == "get_microbits":
                 with open("microbits_configuration.json", "r") as file:
                     sensor_data = json.load(file)
                     sensor_data = json.dumps(sensor_data)
-                    response = sensor_data.encode("utf-8")
+                    encrypted_data = self.encrypt_message(sensor_data)
+                    response = encrypted_data.encode("utf-8")
                     socket.sendto(response, self.client_address)
             elif message[:15] == "configuration :":
                 json_part = message.split(":", 1)[1].strip()
@@ -190,7 +215,7 @@ if __name__ == "__main__":
         print(f"Using IP address: {HOST}")
     else:
         print("No IP address provided. Using default: 0.0.0.0")
-    #initUART()
+    initUART()
     f = open(FILENAME, "a")
     print("Press Ctrl-C to quit.")
 
