@@ -3,10 +3,10 @@
     "name": "Microbit I1",
     "id": "I1",
     "temperature": 26,
-    "humidity": 42,
-    "luminosity": 6,
-    "temperatureConfigIndex": 1,
+    "humidity": 57,
+    "luminosity": 459,
+    "temperatureConfigIndex": 0,
     "humidityConfigIndex": 2,
-    "luminosityConfigIndex": 0
+    "luminosityConfigIndex": 1
   }
 ]

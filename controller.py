@@ -6,12 +6,12 @@ import signal
 import sys
 import socket
 import socketserver
-import serial # pip install pyserial
+import serial  # pip install pyserial
 import threading
 import json
 import queue
 import base64
-from Crypto.Cipher import AES # pip install pycryptodome
+from Crypto.Cipher import AES  # pip install pycryptodome
 from Crypto.Util.Padding import unpad
 from Crypto.Util.Padding import pad
 from Crypto.Random import get_random_bytes
@@ -25,7 +25,7 @@ LAST_VALUE = "LA FRANCE !"
 notification_queue = queue.Queue()
 
 # Clé AES partagée
-key = b'1234567890abcdef'
+key = b"1234567890abcdef"
 
 
 class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
@@ -35,21 +35,18 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         encrypted_data = base64.b64decode(data_b64)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size)
-        return decrypted.decode('utf-8')
-    
+        return decrypted.decode("utf-8")
+
     def encrypt_message(self, plaintext: str) -> str:
         iv = get_random_bytes(16)
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        padded_text = pad(plaintext.encode('utf-8'), AES.block_size)
+        padded_text = pad(plaintext.encode("utf-8"), AES.block_size)
         encrypted_bytes = cipher.encrypt(padded_text)
-        iv_b64 = base64.b64encode(iv).decode('utf-8')
-        data_b64 = base64.b64encode(encrypted_bytes).decode('utf-8')
-        message = {
-            "iv": iv_b64,
-            "data": data_b64
-        }
+        iv_b64 = base64.b64encode(iv).decode("utf-8")
+        data_b64 = base64.b64encode(encrypted_bytes).decode("utf-8")
+        message = {"iv": iv_b64, "data": data_b64}
         return json.dumps(message)
-    
+
     def handle(self):
         data = self.request[0].strip()
         socket = self.request[1]
@@ -69,7 +66,9 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
             print("Failed to decode JSON from client")
             return
         except Exception as e:
-            print(f"Error processing message: {message} from client {self.client_address} will be ignored")
+            print(
+                f"Error processing message: {message} from client {self.client_address} will be ignored"
+            )
             print(f"Exception caught: {e}")
             return
         if data != "":
@@ -193,6 +192,7 @@ def writeUartMessage(data):
         with open("microbits_configuration.json", "w") as file:
             json.dump(sensor_data, file, indent=2)
         return display_config
+    return ""
 
 
 def read_until_newline(ser):
